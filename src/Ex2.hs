@@ -1,20 +1,15 @@
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 
 module Ex2 where
 
-type Square      = Square' Nil
+type Square = Square' Nil
 data Square' t a = Zero (t (t a)) | Succ (Square' (Cons t) a)
 
 data Nil    a = Nil
 data Cons t a = Cons a (t a)
 
---EXERCISE 1.1
-emptyMatrix :: Square a
-emptyMatrix = Zero Nil
-
-
+--EXERCISE 2.1
 matrix_1 :: Square Integer
 matrix_1 = Succ $ Succ $ Zero $ Cons row_1 $ Cons row_2 Nil where
   row_1 = Cons 1 $ Cons 0 Nil
@@ -26,7 +21,7 @@ matrix_2 = Succ $ Succ $ Succ $ Zero $ Cons row_1 $ Cons row_2 $ Cons row_3 Nil 
   row_2 = Cons 4 $ Cons 5 $ Cons 6 Nil
   row_3 = Cons 7 $ Cons 8 $ Cons 9 Nil
 
--- EXERCISE 1.2
+-- EXERCISE 2.2
 eqNil :: (a -> a -> Bool) -> (Nil a -> Nil a -> Bool)
 eqNil _ Nil Nil = True
 
@@ -39,7 +34,7 @@ eqCons eqT eqA (Cons x xs) (Cons y ys) = eqA x y && eqT eqA xs ys
 -- It expects a type b -> b -> Bool (the type of eqT) where b can be different from a
 -- By adding the forall b. we indicate that the function works for ANY b
 
--- EXERCISE 1.3
+-- EXERCISE 2.3
 eqSquare' :: (forall b . (b -> b -> Bool) -> (t b -> t b -> Bool))
           -> (a -> a -> Bool)
           -> (Square' t a -> Square' t a -> Bool)
@@ -49,15 +44,39 @@ eqSquare' _   _   _         _         = False
 -- By adding forall we indicate that b in the outer eqSquare' definition is the same as the
 -- b in the inner definition, meaning that in inner eqSquare' b is not forAll b, but just b
 
--- EXERCISE 1.4
+-- EXERCISE 2.4
 eqSquare :: (a -> a -> Bool) -> Square a -> Square a -> Bool
 eqSquare = eqSquare' eqNil
 
 instance Eq a => Eq (Square a) where
   (==) = eqSquare (==)
 
---mapSquare :: (a -> b) -> Square a -> Square b
---mapSquare f (Zero t) = Zero t
+mapNil :: (a -> b) -> (Nil a -> Nil b)
+mapNil _ Nil = Nil
 
---instance Functor Square where
+mapCons :: ((a -> b) -> (t a -> t b))
+        -> (a -> b) -> Cons t a -> Cons t b
+mapCons mapT f (Cons x xs) = Cons (f x) (mapT f xs)
+
+mapSquare' :: (forall c d. (c -> d) -> (t c -> t d))
+           -> (a -> b) -> Square' t a -> Square' t b
+mapSquare' mapT f (Succ xs) = Succ (mapSquare' (mapCons mapT) f xs)
+mapSquare' mapT f (Zero xs) = Zero (mapT (mapT f) xs)
+
+mapSquare :: (a -> b) -> Square a -> Square b
+mapSquare = mapSquare' mapNil
+
+-- EXERCISE 2.5
+
+-- type Square a = Square' Nil a
+-- instance Functor Square where
+--    fmap = mapSquare
+
+-- The error we get with above declaration is that square should have one argument, so we
+-- change the instance declaration:
+
+--instance Functor (Square a) where
 --  fmap = mapSquare
+
+-- Which gives us the error that we expect a kind * -> * but square has kind *
+-- Can't really figure out why this restriction is there
