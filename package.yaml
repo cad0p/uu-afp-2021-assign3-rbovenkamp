@@ -25,3 +25,18 @@ dependencies:
 
 library:
   source-dirs: src
+
+tests:
+  assign3-prednaz-test:
+    main:                Prednaz.hs
+    source-dirs:         test/prednaz
+    ghc-options:
+    - -Wall
+    - -fwarn-incomplete-uni-patterns
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - Assignment3
+    - hspec
+    - mtl

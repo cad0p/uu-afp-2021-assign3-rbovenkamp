@@ -1,5 +1,5 @@
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE RankNTypes        #-}
 
 module Ex2 where
 
@@ -65,6 +65,9 @@ mapSquare' mapT f (Zero xs) = Zero (mapT (mapT f) xs)
 
 mapSquare :: (a -> b) -> Square a -> Square b
 mapSquare = mapSquare' mapNil
+
+instance Functor Square where
+  fmap = mapSquare
 
 -- EXERCISE 2.5
 

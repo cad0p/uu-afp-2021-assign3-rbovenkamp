@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -fmax-simplifier-iterations=1 #-}
 
-module Ex1 where
+module Ex1 (Ex1.foldr) where
 
 -- EXERCISE 1.1
 fix :: (a -> a) -> a

@@ -2,10 +2,10 @@
 
 module Ex3 where
 
-import Control.Monad ((>=>))
-import Control.Monad.State (MonadState, get, put)
+import           Control.Monad          ((>=>))
+import           Control.Monad.RWS.Lazy (when)
 import qualified Control.Monad.RWS.Lazy as R
-import Control.Monad.RWS.Lazy (when)
+import           Control.Monad.State    (MonadState, get, put)
 
 
 data Teletype a = End a
@@ -13,8 +13,8 @@ data Teletype a = End a
                 | Put Char (Teletype a)
 
 -- EXERCISE 3.1
-returnLine :: Teletype String
-returnLine = Get (getter "") where
+getLine :: Teletype String
+getLine = Get (getter "") where
   getter :: String -> Char -> Teletype String
   getter str '\n' = End (str ++ ['\n'])
   getter str c    = Get (getter (str ++ [c]))
@@ -68,7 +68,7 @@ runRWS (End x) = return x
 runRWS (Get g) = do cs <- R.ask;
                     when (null cs) $ error "No termination with given input";
                     R.local (\_ -> tail cs) $ do
-                    runRWS (g (head cs));
+                      runRWS (g (head cs));
 runRWS (Put c x) = do R.modify $ (++) [c];
                       runRWS x;
 
